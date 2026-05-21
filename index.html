@@ -255,8 +255,8 @@
     justify-content: center;
   }
 
-  /* SVG product illustration */
-  .product-svg { width: 100%; height: 100%; }
+  /* Modificado para soportar imagen base64 */
+  .product-svg { width: 100%; height: 100%; object-fit: contain; }
 
   .carousel-btn {
     position: absolute;
@@ -1329,7 +1329,7 @@
     .newsletter-section { padding: 3rem 1.5rem; }
   }
 
-  /* PRODUCT COLORS */
+  /* PRODUCT COLORS - (Siguen aplicando para los SVG de los otros slides si se visitan) */
   .product-body-olive { fill: #5C6645; }
   .product-body-sand { fill: #C4A87A; }
   .product-body-navy { fill: #2E3D52; }
@@ -1430,37 +1430,10 @@
     <!-- CENTER: PRODUCT + CAROUSEL -->
     <div class="hero-center">
       <div class="carousel-wrap">
-        <!-- SLIDE 1: Vista frontal -->
+        <!-- SLIDE 1: Vista frontal (REEMPLAZADA POR IMAGEN BASE64 DINÁMICA) -->
         <div class="carousel-slide active" id="slide-0">
           <div class="product-visual">
-            <svg class="product-svg" viewBox="0 0 280 380" fill="none" xmlns="http://www.w3.org/2000/svg" id="productSvg">
-              <!-- Funda principal -->
-              <rect x="60" y="60" width="160" height="260" rx="20" class="product-body" fill="#5C6645"/>
-              <!-- Compartimento trasero -->
-              <rect x="68" y="80" width="144" height="80" rx="8" class="product-accent" fill="#4A5835" opacity="0.6"/>
-              <!-- Cierre vertical -->
-              <line x1="140" y1="68" x2="140" y2="310" stroke="#8A9870" stroke-width="2" stroke-dasharray="4,3" class="product-stitch"/>
-              <!-- Soporte celular (bolsillo frontal) -->
-              <rect x="75" y="170" width="130" height="95" rx="10" fill="#4A5835" opacity="0.8"/>
-              <rect x="80" y="175" width="120" height="85" rx="7" fill="#3A4725" opacity="0.5"/>
-              <!-- Icono celular interior -->
-              <rect x="105" y="190" width="70" height="55" rx="4" fill="#8A9870" opacity="0.4"/>
-              <line x1="140" y1="238" x2="140" y2="242" stroke="#8A9870" stroke-width="2" stroke-linecap="round"/>
-              <!-- Gancho lateral -->
-              <path d="M220 140 Q240 140 240 155 Q240 170 225 170" stroke="#C8C0B0" stroke-width="3" stroke-linecap="round" fill="none"/>
-              <circle cx="225" cy="170" r="4" fill="#C8C0B0"/>
-              <!-- Mosquetón -->
-              <rect x="222" y="165" width="12" height="18" rx="6" stroke="#A8A098" stroke-width="2" fill="none"/>
-              <!-- Bolsillo tarjeta -->
-              <rect x="75" y="278" width="55" height="32" rx="6" fill="#3A4725" opacity="0.7"/>
-              <line x1="78" y1="288" x2="124" y2="288" stroke="#8A9870" stroke-width="1" opacity="0.5"/>
-              <!-- Logo TERMIDOCK -->
-              <text x="140" y="155" text-anchor="middle" fill="#D4DCC8" font-family="Georgia, serif" font-size="9" letter-spacing="3" opacity="0.9">TERMIDOCK</text>
-              <!-- Asa superior -->
-              <path d="M100 62 Q140 40 180 62" stroke="#6B7A52" stroke-width="5" stroke-linecap="round" fill="none"/>
-              <!-- Costuras decorativas -->
-              <rect x="63" y="63" width="154" height="254" rx="18" stroke="#8A9870" stroke-width="1" stroke-dasharray="6,4" fill="none" opacity="0.4"/>
-            </svg>
+            <img id="productImage" class="product-svg" src="data:image/png;base64,PEGAR_BASE64_VERDE_OLIVA_AQUI" alt="Funda TERMIDOCK" />
           </div>
         </div>
 
@@ -1874,10 +1847,23 @@
   let currentColor = 'olive';
   const totalSlides = 3;
 
+  // COLOR DATA - ACÁ PEGAS TUS 3 CADENAS EN BASE64
   const colorData = {
-    olive: { name: 'Verde Oliva', body: '#5C6645', accent: '#4A5835', stitch: '#8A9870', emoji: '🟢' },
-    sand: { name: 'Arena', body: '#C4A87A', accent: '#A8885A', stitch: '#DEC99A', emoji: '🟤' },
-    navy: { name: 'Arena', body: '#2E3D52', accent: '#1E2D3E', stitch: '#5A7090', emoji: '🔵' }
+    olive: { 
+      name: 'Verde Oliva', 
+      base64: 'data:image/png;base64,PEGAR_BASE64_VERDE_OLIVA_AQUI',
+      body: '#5C6645', accent: '#4A5835', stitch: '#8A9870', emoji: '🟢' 
+    },
+    sand: { 
+      name: 'Arena', 
+      base64: 'data:image/png;base64,PEGAR_BASE64_ARENA_AQUI',
+      body: '#C4A87A', accent: '#A8885A', stitch: '#DEC99A', emoji: '🟤' 
+    },
+    navy: { 
+      name: 'Azul Marino', 
+      base64: 'data:image/png;base64,PEGAR_BASE64_AZUL_MARINO_AQUI',
+      body: '#2E3D52', accent: '#1E2D3E', stitch: '#5A7090', emoji: '🔵' 
+    }
   };
 
   const modalData = {
@@ -1923,19 +1909,28 @@
     });
   }
 
-  // COLOR SELECTOR
+  // COLOR SELECTOR (Modificado para actualizar el base64 de la imagen y los SVGs restantes)
   function selectColor(color, el) {
     currentColor = color;
     document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
 
     const c = colorData[color];
-    const svg = document.getElementById('productSvg');
-    if (svg) {
-      svg.querySelectorAll('.product-body').forEach(e => e.setAttribute('fill', c.body));
-      svg.querySelectorAll('.product-accent').forEach(e => e.setAttribute('fill', c.accent));
-      svg.querySelectorAll('.product-stitch').forEach(e => e.setAttribute('stroke', c.stitch));
+    
+    // Cambiar la imagen principal base64 en Slide 1
+    const img = document.getElementById('productImage');
+    if (img) {
+      img.src = c.base64;
     }
+
+    // Mantener la funcionalidad de cambio de color en los slides 2 y 3 que siguen usando SVG
+    document.querySelectorAll('.product-svg').forEach(svg => {
+      if(svg.tagName.toLowerCase() === 'svg') {
+        svg.querySelectorAll('.product-body').forEach(e => e.setAttribute('fill', c.body));
+        svg.querySelectorAll('.product-accent').forEach(e => e.setAttribute('fill', c.accent));
+        svg.querySelectorAll('.product-stitch').forEach(e => e.setAttribute('stroke', c.stitch));
+      }
+    });
   }
 
   // NEWSLETTER
